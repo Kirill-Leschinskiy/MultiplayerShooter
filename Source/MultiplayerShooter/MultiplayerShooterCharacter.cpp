@@ -12,11 +12,15 @@
 #include "InputActionValue.h"
 #include "MultiplayerShooter.h"
 
+DEFINE_LOG_CATEGORY(CharacterLog);
+
 AMultiplayerShooterCharacter::AMultiplayerShooterCharacter()
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
-		
+
+	PrimaryActorTick.bCanEverTick = false;
+
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -70,6 +74,23 @@ void AMultiplayerShooterCharacter::SetupPlayerInputComponent(UInputComponent* Pl
 	{
 		UE_LOG(LogMultiplayerShooter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
+}
+
+void AMultiplayerShooterCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	UE_LOG(CharacterLog, Error, TEXT("%hs"), "Hello");
+
+	LogByLogger(FName("CharacterLogWritten"), GetName());
+}
+
+void AMultiplayerShooterCharacter::LogInfo(TArray<FString>& LogArray)
+{
+	const auto Loc = GetActorLocation();
+	const auto Rot = GetActorRotation();
+	LogArray.Add(FString::Printf(TEXT("Character location is X=%f, Y=%f, Z=%f"), Loc.X, Loc.Y, Loc.Z));
+	LogArray.Add(FString::Printf(TEXT("Character rotation is X=%f, Y=%f, Z=%f"), Rot.Pitch, Rot.Yaw, Rot.Roll));
 }
 
 void AMultiplayerShooterCharacter::Move(const FInputActionValue& Value)

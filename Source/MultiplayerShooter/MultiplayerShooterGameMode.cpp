@@ -4,5 +4,5 @@
 
 AMultiplayerShooterGameMode::AMultiplayerShooterGameMode()
 {
-	// stub
+	
 }
