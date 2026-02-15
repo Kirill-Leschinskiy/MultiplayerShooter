@@ -1,0 +1,13 @@
+.idea/
+.vs/
+Binaries/
+Saved/
+DerivedDataCache/
+Intermediate/
+Platforms/
+__ExternalActors__
+__ExternalObjects__
+
+.vsconfig
+*.sln
+
