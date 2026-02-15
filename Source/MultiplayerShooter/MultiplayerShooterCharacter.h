@@ -1,7 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #pragma once
-
+#include "MultiplayerShooter/Public/Interfaces/ILogger.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
@@ -12,14 +12,14 @@ class UCameraComponent;
 class UInputAction;
 struct FInputActionValue;
 
-DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
+DECLARE_LOG_CATEGORY_EXTERN(CharacterLog, All, All);
 
 /**
  *  A simple player-controllable third person character
  *  Implements a controllable orbiting camera
  */
 UCLASS(abstract)
-class AMultiplayerShooterCharacter : public ACharacter
+class AMultiplayerShooterCharacter : public ACharacter, public IILogger
 {
 	GENERATED_BODY()
 
@@ -58,6 +58,10 @@ protected:
 
 	/** Initialize input action bindings */
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	virtual void BeginPlay() override;
+
+	virtual void LogInfo(TArray<FString>& LogArray) override;
 
 protected:
 
