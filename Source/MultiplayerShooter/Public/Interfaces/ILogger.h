@@ -21,11 +21,12 @@ class MULTIPLAYERSHOOTER_API IILogger
 {
 	GENERATED_BODY()
 
-
+public:
+	void LogByLogger(const FName& LogName, const FString& OwnerName);
 protected:
 	virtual void LogInfo(TArray<FString>& LogArray){}
 
-	void LogByLogger(const FName& LogName, const FString& OwnerName);
+	
 private:
 	void LogStatement(FString& Statement, bool bBegin);
 };
