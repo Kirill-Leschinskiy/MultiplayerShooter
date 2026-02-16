@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
+#include "InputMappingContext.h"
 #include "MultiplayerShooterCharacter.generated.h"
 
 class USpringArmComponent;
@@ -33,6 +34,7 @@ class AMultiplayerShooterCharacter : public ACharacter, public IILogger
 	
 protected:
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input") UInputMappingContext* DefaultMappingContext;
 	/** Jump Input Action */
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* JumpAction;
@@ -61,10 +63,14 @@ protected:
 
 	virtual void BeginPlay() override;
 
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 	virtual void LogInfo(TArray<FString>& LogArray) override;
 
 protected:
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite);
+	class UHealthComponent* HealthComponent;
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
 

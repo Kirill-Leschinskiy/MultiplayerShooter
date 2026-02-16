@@ -10,6 +10,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "MultiplayerShooter/Public/Components/HealthComponent.h"
 #include "MultiplayerShooter.h"
 
 DEFINE_LOG_CATEGORY(CharacterLog);
@@ -52,6 +53,8 @@ AMultiplayerShooterCharacter::AMultiplayerShooterCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>("HealthComponent");
 }
 
 void AMultiplayerShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -80,9 +83,24 @@ void AMultiplayerShooterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (APlayerController* PlayerController = Cast<APlayerController>(Controller)) {
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = 
+			ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+		}
+	}
+
 	UE_LOG(CharacterLog, Error, TEXT("%hs"), "Hello");
 
 	LogByLogger(FName("CharacterLogWritten"), GetName());
+}
+
+void AMultiplayerShooterCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	OnTakeAnyDamage.Clear();
+
+	Super::EndPlay(EndPlayReason);
 }
 
 void AMultiplayerShooterCharacter::LogInfo(TArray<FString>& LogArray)
@@ -91,6 +109,12 @@ void AMultiplayerShooterCharacter::LogInfo(TArray<FString>& LogArray)
 	const auto Rot = GetActorRotation();
 	LogArray.Add(FString::Printf(TEXT("Character location is X=%f, Y=%f, Z=%f"), Loc.X, Loc.Y, Loc.Z));
 	LogArray.Add(FString::Printf(TEXT("Character rotation is X=%f, Y=%f, Z=%f"), Rot.Pitch, Rot.Yaw, Rot.Roll));
+
+	for (UActorComponent* Component : GetComponents()) {
+		const auto LogComponent = Cast<IILogger>(Component);
+		if (LogComponent) LogComponent->LogByLogger("ComponentLog", Component->GetName());
+	}
+	
 }
 
 void AMultiplayerShooterCharacter::Move(const FInputActionValue& Value)
