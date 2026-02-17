@@ -82,9 +82,7 @@ protected:
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 
-	UFUNCTION(BlueprintCallable, Category = "Damage")
-	virtual void ApplyDamage(float DamageAmount);
-
+	
 public:
 
 	/** Handles move inputs from either controls or UI interfaces */
@@ -108,6 +106,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Shield")
 	UShieldComponent* GetShieldComponent() const { return ShieldComponent; }
+
+	UFUNCTION(BlueprintCallable, Category = "Damage")
+	virtual void ApplyDamage(float DamageAmount);
 public:
 
 	/** Returns CameraBoom subobject **/
