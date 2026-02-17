@@ -12,6 +12,8 @@ class USpringArmComponent;
 class UCameraComponent;
 class UInputAction;
 struct FInputActionValue;
+class UHealthComponent;
+class UShieldComponent;
 
 DECLARE_LOG_CATEGORY_EXTERN(CharacterLog, All, All);
 
@@ -69,13 +71,19 @@ protected:
 
 protected:
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite);
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components");
 	class UHealthComponent* HealthComponent;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	UShieldComponent* ShieldComponent;
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
+
+	UFUNCTION(BlueprintCallable, Category = "Damage")
+	virtual void ApplyDamage(float DamageAmount);
 
 public:
 
@@ -95,6 +103,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void DoJumpEnd();
 
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	UHealthComponent* GetHealthComponent() const { return HealthComponent; }
+
+	UFUNCTION(BlueprintCallable, Category = "Shield")
+	UShieldComponent* GetShieldComponent() const { return ShieldComponent; }
 public:
 
 	/** Returns CameraBoom subobject **/

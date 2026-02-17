@@ -2,6 +2,7 @@
 
 
 #include "MultiplayerShooter\Public\Components\HealthComponent.h"
+#include "MultiplayerShooter/Public/Components/ShieldComponent.h"
 #include "GameFramework/Actor.h"
 #include "Engine/World.h"
 #include "GameFramework/DamageType.h"
@@ -45,13 +46,32 @@ void UHealthComponent::SetHealth(float NewHealth)
 	
 }
 
+void UHealthComponent::TakeDamageWithShield(float Damage, UShieldComponent* ShieldComponent)
+{
+	if (Damage <= 0.f) return;
+
+	float RemainingDamage = Damage;
+
+	if (ShieldComponent && IsValid(ShieldComponent))
+	{
+		RemainingDamage = ShieldComponent->AbsorbDamage(Damage);
+	}
+
+	if (RemainingDamage > 0.f)
+	{
+		SetHealth(CurrentHealth - RemainingDamage);
+	}
+}
+
 void UHealthComponent::TakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, 
 	AController* InstigatedBy, AActor* DamageCauser)
 {
 	if (Damage <= 0.f) return;
 
 	if (DamagedActor && DamagedActor == GetOwner() && IsValid(this)) {
-		SetHealth(CurrentHealth - Damage);
+		UShieldComponent* ShieldComponent = GetOwner()->FindComponentByClass<UShieldComponent>();
+
+		TakeDamageWithShield(Damage, ShieldComponent);
 	}
 
 	

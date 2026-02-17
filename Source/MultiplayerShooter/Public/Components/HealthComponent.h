@@ -13,12 +13,13 @@ class MULTIPLAYERSHOOTER_API UHealthComponent : public UActorComponent, public I
 	GENERATED_BODY()
 
 public:	
-	// Sets default values for this component's properties
 	UHealthComponent();
+
+	void TakeDamageWithShield(float Damage, class UShieldComponent* ShieldComponent = nullptr);
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health");
-	float MaxHealth = 300.f;
+	float MaxHealth = 100.f;
 
 	virtual void BeginPlay() override;
 
@@ -26,7 +27,16 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void SetHealth(float NewHealth);
-		
+	
+	UFUNCTION(BlueprintCallable)
+	float GetCurrentHealth() const { return CurrentHealth; }
+
+	UFUNCTION(BlueprintCallable)
+	float GetMaxHealth() const { return MaxHealth; }
+
+	UFUNCTION(BlueprintCallable)
+	bool IsDead() const { return FMath::IsNearlyZero(CurrentHealth); }
+
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Health")
 	float CurrentHealth = 0;

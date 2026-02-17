@@ -11,6 +11,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "MultiplayerShooter/Public/Components/HealthComponent.h"
+#include "MultiplayerShooter/Public/Components/ShieldComponent.h"
 #include "MultiplayerShooter.h"
 
 DEFINE_LOG_CATEGORY(CharacterLog);
@@ -55,6 +56,7 @@ AMultiplayerShooterCharacter::AMultiplayerShooterCharacter()
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>("HealthComponent");
+	ShieldComponent = CreateDefaultSubobject<UShieldComponent>("ShieldComponent");
 }
 
 void AMultiplayerShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -115,6 +117,14 @@ void AMultiplayerShooterCharacter::LogInfo(TArray<FString>& LogArray)
 		if (LogComponent) LogComponent->LogByLogger("ComponentLog", Component->GetName());
 	}
 	
+}
+
+void AMultiplayerShooterCharacter::ApplyDamage(float DamageAmount)
+{
+	if (HealthComponent && IsValid(HealthComponent))
+	{
+		HealthComponent->TakeDamageWithShield(DamageAmount, ShieldComponent);
+	}
 }
 
 void AMultiplayerShooterCharacter::Move(const FInputActionValue& Value)
