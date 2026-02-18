@@ -14,6 +14,10 @@
 #include "MultiplayerShooter/Public/Components/ShieldComponent.h"
 #include "MultiplayerShooter.h"
 
+#include "Engine/World.h"
+#include "Engine/Engine.h"
+#include "EngineUtils.h"
+
 DEFINE_LOG_CATEGORY(CharacterLog);
 
 AMultiplayerShooterCharacter::AMultiplayerShooterCharacter()
@@ -96,6 +100,10 @@ void AMultiplayerShooterCharacter::BeginPlay()
 	UE_LOG(CharacterLog, Error, TEXT("%hs"), "Hello");
 
 	LogByLogger(FName("CharacterLogWritten"), GetName());
+
+	SimpleDelegate.BindUObject(this, &AMultiplayerShooterCharacter::CppMethod);
+
+	UE_LOG(LogTemp, Warning, TEXT("SimpleDelegate привязан к CppMethod"));
 }
 
 void AMultiplayerShooterCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -124,6 +132,52 @@ void AMultiplayerShooterCharacter::ApplyDamage(float DamageAmount)
 	if (HealthComponent && IsValid(HealthComponent))
 	{
 		HealthComponent->TakeDamageWithShield(DamageAmount, ShieldComponent);
+	}
+}
+
+void AMultiplayerShooterCharacter::BlueprintCallableMethod()
+{
+	UE_LOG(LogTemp, Warning, TEXT("=== BlueprintCallableMethod вызван! Активирую SimpleDelegate... ==="));
+
+	if (SimpleDelegate.IsBound())
+	{
+		SimpleDelegate.Execute();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("SimpleDelegate не привязан!"));
+	}
+}
+
+void AMultiplayerShooterCharacter::CppMethod()
+{
+	UE_LOG(LogTemp, Warning, TEXT("=== CppMethod вызван! Активирую DynamicDelegate... ==="));
+
+	if (DynamicDelegate.IsBound())
+	{
+		DynamicDelegate.ExecuteIfBound();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("DynamicDelegate не привязан!"));
+	}
+}
+
+void AMultiplayerShooterCharacter::ActivateDelegates()
+{
+	UE_LOG(LogTemp, Warning, TEXT("=== ActivateDelegates: Запускаю цепочку делегатов... ==="));
+
+	if (DynamicDelegate.IsBound())
+	{
+		DynamicDelegate.ExecuteIfBound();
+	}
+	else if (SimpleDelegate.IsBound())
+	{
+		SimpleDelegate.Execute();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Ни один делегат не привязан!"));
 	}
 }
 
@@ -185,4 +239,92 @@ void AMultiplayerShooterCharacter::DoJumpEnd()
 {
 	// signal the character to stop jumping
 	StopJumping();
+}
+
+TArray<AActor*> AMultiplayerShooterCharacter::FindActorsOfClass()
+{
+	TArray<AActor*> FoundActors;
+
+	if (!TargetClass)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("FindActorsOfClass: TargetClass не задан!"));
+		return FoundActors;
+	}
+
+	// Получаем всех акторов в мире
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		for (TActorIterator<AActor> It(World, TargetClass); It; ++It)
+		{
+			AActor* Actor = *It;
+			if (Actor && Actor != this) // Исключаем самого персонажа
+			{
+				FoundActors.Add(Actor);
+			}
+		}
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("FindActorsOfClass: Найдено %d акторов класса %s"),
+		FoundActors.Num(), *TargetClass->GetName());
+
+	return FoundActors;
+}
+
+bool AMultiplayerShooterCharacter::SortActorsByDistance(TArray<AActor*>& ActorsToSort)
+{
+	// Проверка на пустой массив
+	if (ActorsToSort.Num() == 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SortActorsByDistance: Массив пуст!"));
+		return false;
+	}
+
+	FVector PlayerLocation = GetActorLocation();
+
+	// Сортировка по убыванию дальности (от самых дальних к ближайшим)
+	ActorsToSort.Sort([PlayerLocation](const AActor& A, const AActor& B) {
+		float DistA = FVector::Dist(PlayerLocation, A.GetActorLocation());
+		float DistB = FVector::Dist(PlayerLocation, B.GetActorLocation());
+		return DistA > DistB; // По убыванию (больше дистанция -> первым)
+		});
+
+	UE_LOG(LogTemp, Warning, TEXT("SortActorsByDistance: Массив отсортирован (по убыванию дальности)"));
+	return true;
+}
+
+void AMultiplayerShooterCharacter::FindAndLogTargets()
+{
+	UE_LOG(LogTemp, Warning, TEXT("========== НАЧАЛО ПОИСКА ЦЕЛЕЙ =========="));
+
+	TArray<AActor*> Targets = FindActorsOfClass();
+
+	bool bSortSuccess = SortActorsByDistance(Targets);
+
+	if (!bSortSuccess || Targets.Num() == 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("FindAndLogTargets: Не найдено целей для логирования"));
+		return;
+	}
+
+	FVector PlayerLocation = GetActorLocation();
+
+	UE_LOG(LogTemp, Warning, TEXT("Найдено и отсортировано %d целей:"), Targets.Num());
+
+	for (int32 i = 0; i < Targets.Num(); i++)
+	{
+		AActor* Target = Targets[i];
+		if (Target)
+		{
+			FVector TargetLocation = Target->GetActorLocation();
+			float Distance = FVector::Dist(PlayerLocation, TargetLocation);
+
+			UE_LOG(LogTemp, Warning, TEXT("  [%d] %s"), i + 1, *Target->GetName());
+			UE_LOG(LogTemp, Warning, TEXT("      Дистанция: %.2f"), Distance);
+			UE_LOG(LogTemp, Warning, TEXT("      Позиция: X=%.2f, Y=%.2f, Z=%.2f"),
+				TargetLocation.X, TargetLocation.Y, TargetLocation.Z);
+		}
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("========== КОНЕЦ ПОИСКА ЦЕЛЕЙ =========="));
 }

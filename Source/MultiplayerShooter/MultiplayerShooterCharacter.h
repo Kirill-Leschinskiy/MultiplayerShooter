@@ -1,6 +1,9 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #pragma once
+
+#include "Delegates/Delegate.h"
+#include "Delegates/DelegateCombinations.h"
 #include "MultiplayerShooter/Public/Interfaces/ILogger.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
@@ -17,10 +20,11 @@ class UShieldComponent;
 
 DECLARE_LOG_CATEGORY_EXTERN(CharacterLog, All, All);
 
-/**
- *  A simple player-controllable third person character
- *  Implements a controllable orbiting camera
- */
+
+DECLARE_DELEGATE(FSimpleDelegate);
+
+DECLARE_DYNAMIC_DELEGATE(FDynamicDelegate);
+
 UCLASS(abstract)
 class AMultiplayerShooterCharacter : public ACharacter, public IILogger
 {
@@ -110,6 +114,31 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Damage")
 	virtual void ApplyDamage(float DamageAmount);
 public:
+	FSimpleDelegate SimpleDelegate;
+	FDynamicDelegate DynamicDelegate;
+
+	UFUNCTION(BlueprintCallable, Category = "Delegates")
+	void BlueprintCallableMethod();
+
+	void CppMethod();
+
+	UFUNCTION(BlueprintCallable, Category = "Delegates")
+	void ActivateDelegates();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Target Search")
+	TSubclassOf<AActor> TargetClass;
+
+	// Первый метод: поиск акторов заданного класса
+	UFUNCTION(BlueprintCallable, Category = "Target Search")
+	TArray<AActor*> FindActorsOfClass();
+
+	// Второй метод: сортировка массива по дальности (возвращает bool - успех/неудача)
+	UFUNCTION(BlueprintCallable, Category = "Target Search")
+	bool SortActorsByDistance(TArray<AActor*>& ActorsToSort);
+
+	// Третий метод: BlueprintCallable - вызывает первые два и выводит информацию в лог
+	UFUNCTION(BlueprintCallable, Category = "Target Search")
+	void FindAndLogTargets();
 
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
