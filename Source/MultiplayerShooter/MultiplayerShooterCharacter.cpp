@@ -273,7 +273,6 @@ TArray<AActor*> AMultiplayerShooterCharacter::FindActorsOfClass()
 
 bool AMultiplayerShooterCharacter::SortActorsByDistance(TArray<AActor*>& ActorsToSort)
 {
-	// Проверка на пустой массив
 	if (ActorsToSort.Num() == 0)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("SortActorsByDistance: Массив пуст!"));
@@ -282,11 +281,10 @@ bool AMultiplayerShooterCharacter::SortActorsByDistance(TArray<AActor*>& ActorsT
 
 	FVector PlayerLocation = GetActorLocation();
 
-	// Сортировка по убыванию дальности (от самых дальних к ближайшим)
 	ActorsToSort.Sort([PlayerLocation](const AActor& A, const AActor& B) {
 		float DistA = FVector::Dist(PlayerLocation, A.GetActorLocation());
 		float DistB = FVector::Dist(PlayerLocation, B.GetActorLocation());
-		return DistA > DistB; // По убыванию (больше дистанция -> первым)
+		return DistA > DistB;
 		});
 
 	UE_LOG(LogTemp, Warning, TEXT("SortActorsByDistance: Массив отсортирован (по убыванию дальности)"));
