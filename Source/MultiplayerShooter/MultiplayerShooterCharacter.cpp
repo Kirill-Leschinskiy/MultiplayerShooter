@@ -251,13 +251,14 @@ TArray<AActor*> AMultiplayerShooterCharacter::FindActorsOfClass()
 		return FoundActors;
 	}
 
+	// Получаем всех акторов в мире
 	UWorld* World = GetWorld();
 	if (World)
 	{
 		for (TActorIterator<AActor> It(World, TargetClass); It; ++It)
 		{
 			AActor* Actor = *It;
-			if (Actor && Actor != this)
+			if (Actor && Actor != this) // Исключаем самого персонажа
 			{
 				FoundActors.Add(Actor);
 			}
