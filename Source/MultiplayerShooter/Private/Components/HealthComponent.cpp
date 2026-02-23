@@ -63,6 +63,16 @@ void UHealthComponent::TakeDamageWithShield(float Damage, UShieldComponent* Shie
 	}
 }
 
+bool UHealthComponent::TryPickUpHealth(float HealthPoints)
+{
+	if (CurrentHealth == MaxHealth || HealthPoints == 0) {
+		return false;
+	}
+	SetHealth(CurrentHealth + HealthPoints);
+	return true;
+	
+}
+
 void UHealthComponent::TakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, 
 	AController* InstigatedBy, AActor* DamageCauser)
 {
