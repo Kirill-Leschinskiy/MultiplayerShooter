@@ -19,7 +19,11 @@ public:
 
 	bool TryPickUpHealth(float HealthPoints);
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 protected:
+	virtual void InitializeComponent() override;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health");
 	float MaxHealth = 100.f;
 
@@ -41,8 +45,11 @@ protected:
 
 
 private:
-	UPROPERTY(VisibleAnywhere, Category = "Health")
+	UPROPERTY(Replicated, ReplicatedUsing = On_RepCurrentHealth)
 	float CurrentHealth = 0;
+
+	UFUNCTION()
+	void On_RepCurrentHealth(float NewCurrentHealth);
 
 	UFUNCTION()
 	void TakeDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, 
