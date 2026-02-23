@@ -3,6 +3,7 @@
 
 #include "MultiplayerShooter\Public\Components\HealthComponent.h"
 #include "MultiplayerShooter/Public/Components/ShieldComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "GameFramework/Actor.h"
 #include "Engine/World.h"
 #include "GameFramework/DamageType.h"
@@ -16,6 +17,18 @@ UHealthComponent::UHealthComponent()
 
 }
 
+void UHealthComponent::InitializeComponent()
+{
+	Super::InitializeComponent();
+
+	if (!HasAnyFlags(RF_ClassDefaultObject) && GetOwner())
+	{
+		if (GetOwner()->HasAuthority())
+		{
+			SetIsReplicated(true);
+		}
+	}
+}
 
 void UHealthComponent::BeginPlay()
 {
@@ -73,7 +86,26 @@ bool UHealthComponent::TryPickUpHealth(float HealthPoints)
 	
 }
 
-void UHealthComponent::TakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, 
+void UHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UHealthComponent, CurrentHealth);
+}
+
+void UHealthComponent::On_RepCurrentHealth(float NewCurrentHealth)
+{
+	if (GetOwnerRole()==ROLE_AutonomousProxy && GetNetMode() == NM_Client)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s on local machine"), *GetOwner()->GetName());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s on local machine"), *GetOwner()->GetName());
+	}
+}
+
+void UHealthComponent::TakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
 	AController* InstigatedBy, AActor* DamageCauser)
 {
 	if (Damage <= 0.f) return;
