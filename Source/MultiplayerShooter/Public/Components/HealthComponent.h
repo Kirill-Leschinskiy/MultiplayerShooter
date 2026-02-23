@@ -17,6 +17,8 @@ public:
 
 	void TakeDamageWithShield(float Damage, class UShieldComponent* ShieldComponent = nullptr);
 
+	bool TryPickUpHealth(float HealthPoints);
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health");
 	float MaxHealth = 100.f;
@@ -36,6 +38,7 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	bool IsDead() const { return FMath::IsNearlyZero(CurrentHealth); }
+
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Health")
